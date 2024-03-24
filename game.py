@@ -8,9 +8,12 @@ class Game:
         pygame.init()
         self.clock = pygame.time.Clock()
         self.screen = Screen((255, 255, 255))
+        self.grid = Grid()
 
         self.menu_on = True
         self.game_on = False
+
+        self.current_player = 'G'
 
     def run(self):
         while True:
@@ -23,7 +26,7 @@ class Game:
             self.clock.tick(10)
 
     def menu_screen(self):
-        self.screen = Screen((0, 0, 0))
+        self.screen.screen.fill((0, 0, 0))
         self.screen.print_text("Menu", (255, 255, 255), 0, -470)
         self.screen.print_text("Press SPACE for play", (255, 255, 255), 0, -440)
         for event in pygame.event.get():
@@ -37,9 +40,10 @@ class Game:
                     return
 
     def game_screen(self):
-        self.screen = Screen((255, 255, 255))
+        self.screen.screen.fill((255, 255, 255))
         self.screen.print_text("Game", (0, 0, 0), 0, -470)
         self.screen.print_text("Press ESCAPE for menu screen", (0, 0, 0), 0, -440)
+        self.grid.print_grid(self.screen.screen)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.screen.quit_screen()
@@ -49,3 +53,14 @@ class Game:
                     self.menu_on = True
                     self.game_on = False
                     return
+                elif pygame.K_KP1 <= event.key <= pygame.K_KP7:  # Vérifie si la touche est entre 1 et 7
+                    col = event.key - pygame.K_KP1  # Calcule l'indice de colonne correspondant à la touche numérique
+                    print(col + 1)  # Affiche le numéro de colonne
+                    if self.grid.place_token(self.current_player, col):
+                        self.switch_player()
+
+    def switch_player(self):
+        if self.current_player == 'G':
+            self.current_player = 'R'
+        else:
+            self.current_player = 'G'
