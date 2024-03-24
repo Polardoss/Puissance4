@@ -26,6 +26,8 @@ class Game:
             self.clock.tick(10)
 
     def menu_screen(self):
+        self.grid.reset_grid()
+
         self.screen.screen.fill((0, 0, 0))
         self.screen.print_text("Menu", (255, 255, 255), 0, -470)
         self.screen.print_text("Press SPACE for play", (255, 255, 255), 0, -440)
@@ -43,7 +45,18 @@ class Game:
         self.screen.screen.fill((255, 255, 255))
         self.screen.print_text("Game", (0, 0, 0), 0, -470)
         self.screen.print_text("Press ESCAPE for menu screen", (0, 0, 0), 0, -440)
+
+    
         self.grid.print_grid(self.screen.screen)
+
+        if self.grid.check_win('G'):
+            self.screen.print_text("WIN GREEN", (0, 255, 0), 0, -410)
+            print("Les vert on win")
+        elif self.grid.check_win('R'):
+            self.screen.print_text("WIN RED", (255, 0, 0), 0, -410)
+            print("Les Rouge on win")
+
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.screen.quit_screen()
