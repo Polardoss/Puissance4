@@ -34,6 +34,8 @@ class Game:
     def menu_screen(self):
         self.grid.reset_grid()
         self.winner = ' '
+        self.current_player = 'G'
+        self.current_player_is_ia = True
 
         self.screen.screen.fill((0, 0, 0))
         self.screen.print_text("Menu", (255, 255, 255), 0, -470)
@@ -95,9 +97,9 @@ class Game:
             self.screen.screen.fill((0, 255, 0))
         else:
             self.screen.screen.fill((255, 0, 0))
-        print(f"C'est le tour de {self.current_player}")
         self.screen.print_text("Press ESCAPE for menu screen", (0, 0, 0), 0, -440)
         self.grid.print_grid(self.screen.screen)
+        print(self.grid.possible_move())
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -121,7 +123,7 @@ class Game:
             self.screen.screen.fill((0, 255, 0))
         else:
             self.screen.screen.fill((255, 0, 0))
-        print(f"C'est le tour de {self.current_player}")
+
         self.screen.print_text("Press ESCAPE for menu screen", (0, 0, 0), 0, -440)
         self.grid.print_grid(self.screen.screen)
 
@@ -138,7 +140,8 @@ class Game:
                     
             #L'IA JOUE
             if not self.grid.check_win('G') and not self.grid.check_win('R'):  # Vérifie si personne n'a gagné encore
-                col =random.randint(0,6)
+                col =self.ia_move()
+                print(col + 1)  # Affiche le numéro de colonne
                 if self.grid.place_token(self.current_player, col):
                     self.switch_player()
         else:
@@ -158,4 +161,41 @@ class Game:
                             self.switch_player()
                         else:
                             print("Impossible de placer le jeton")
+
+    def minimax(self, depth, maximizing_player):
+        if depth == 0 or self.grid.check_win('G') or self.grid.check_win('R'):
+            return self.grid.evaluate_position('G')
         
+        if maximizing_player:
+            max_eval = float('-inf')
+            for move in self.grid.possible_move():
+                row = self.grid.save_row(move)
+                self.grid.place_token('G', move) #fais le coup 
+                eval = self.minimax(depth-1, False)
+                self.grid.grid[row][move] = ' ' #Annule le coup
+                max_eval = max(max_eval, eval)
+            return max_eval
+        else:
+            min_eval = float('inf')
+            for move in self.grid.possible_move():
+                row = self.grid.save_row(move)
+                self.grid.place_token('R', move)
+                eval = self.minimax(depth-1, True)
+                self.grid.grid[row][move] = ' '
+                min_eval = min(min_eval, eval)
+            return min_eval
+
+
+    def ia_move(self):
+        best_move = None
+        max_eval = float('-inf')
+        for move in self.grid.possible_move():
+            row = self.grid.save_row(move)
+            self.grid.place_token('G', move)
+            eval = self.minimax(5, False)
+            self.grid.grid[row][move] = ' '
+            if eval > max_eval:
+                max_eval = eval
+                best_move = move
+        print("La max eval est de : ",max_eval)
+        return best_move
